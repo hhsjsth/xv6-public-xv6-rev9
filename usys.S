@@ -29,3 +29,11 @@ SYSCALL(getpid)
 SYSCALL(sbrk)
 SYSCALL(sleep)
 SYSCALL(uptime)
+
+SYSCALL(sh_var_read)
+SYSCALL(sh_var_write)
+
+SYSCALL(sem_create)
+SYSCALL(sem_free)
+SYSCALL(sem_p)
+SYSCALL(sem_v)

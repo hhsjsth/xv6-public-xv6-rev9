@@ -115,6 +115,7 @@ void            userinit(void);
 int             wait(void);
 void            wakeup(void*);
 void            yield(void);
+void            wakeup1p(void*);
 
 // swtch.S
 void            swtch(struct context**, struct context*);
@@ -127,6 +128,8 @@ void            initlock(struct spinlock*, char*);
 void            release(struct spinlock*);
 void            pushcli(void);
 void            popcli(void);
+int             sh_var_for_sem_demo;
+void            initsem(void);
 
 // string.c
 int             memcmp(const void*, const void*, uint);
