@@ -269,44 +269,49 @@ wait(void)
 //  - swtch to start running that process
 //  - eventually that process transfers control
 //      via swtch back to the scheduler.
-void
-scheduler(void)
-{
-  struct proc *p;
-  int proc_num,last_proc_num, prio;
-  last_proc_num=0;
+void scheduler(void) {
+  struct proc *p, *temp;
+  int priority;
 
-  for(;;){
+  for (;;) {
     // Enable interrupts on this processor.
     sti();
 
     // Loop over process table looking for process to run.
     acquire(&ptable.lock);
-    for (prio = 0; prio < 20; prio++) {
-      for (proc_num = 0; proc_num < NPROC; proc_num++) {
-        p = ptable.proc + ((last_proc_num + 1 + proc_num) % NPROC);
-        if (p->state != RUNNABLE)
-          continue;
-        if(p->priority!=prio)
-          continue;
 
-        last_proc_num=(last_proc_num+1+proc_num) % NPROC;
+    priority = 19;
 
-        // Switch to chosen process.  It is the process's job
-        // to release ptable.lock and then reacquire it
-        // before jumping back to us.
-        proc = p;
-        switchuvm(p);
-        p->state = RUNNING;
-        swtch(&cpu->scheduler, p->context);
-        switchkvm();
-
-        // Process is done running for now.
-        // It should have changed its p->state before coming back.
-        proc = 0;
-      }
-      release(&ptable.lock);
+    for (temp = ptable.proc; temp < &ptable.proc[NPROC]; temp++) //获取当前可运行的最高当前优先级
+    {
+      if (temp->state == RUNNABLE && temp->priority < priority)
+        priority = temp->priority;
     }
+
+    for (p = ptable.proc; p < &ptable.proc[NPROC]; p++) {
+      if (p->state != RUNNABLE)
+        continue;
+      if (p->priority > priority)
+        continue;
+      else {
+        priority = p->priority;
+      }
+
+      // Switch to chosen process.  It is the process's job
+      // to release ptable.lock and then reacquire it
+      // before jumping back to us.
+      proc = p;
+      switchuvm(p);
+      p->state = RUNNING;
+      swtch(&cpu->scheduler, p->context);
+      switchkvm();
+
+      // Process is done running for now.
+      // It should have changed its p->state before coming back.
+      proc = 0;
+    } //endif for proc_num
+
+    release(&ptable.lock);
   }
 }
 
